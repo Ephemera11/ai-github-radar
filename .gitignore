@@ -4,3 +4,5 @@ dist/
 *.tsbuildinfo
 coverage/
 .vite/
+.superpowers/
+apps/api/data/
