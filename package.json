@@ -1,0 +1,14 @@
+{
+  "name": "ai-github-radar",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm --workspace @ai-radar/web run dev",
+    "dev:api": "npm --workspace @ai-radar/api run dev",
+    "build": "npm run build --workspace @ai-radar/shared && npm run build --workspace @ai-radar/api && npm run build --workspace @ai-radar/web",
+    "test:shared": "npm --workspace @ai-radar/shared run test",
+    "test:api": "npm --workspace @ai-radar/api run test",
+    "test:web": "npm --workspace @ai-radar/web run test",
+    "test:e2e": "npm --workspace @ai-radar/web run test:e2e"
+  }
+}
