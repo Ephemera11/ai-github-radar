@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm --workspace @ai-radar/web run build",
+  "outputDirectory": "apps/web/dist",
+  "framework": "create-react-app",
+  "installCommand": "npm install"
+}

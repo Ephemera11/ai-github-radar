@@ -1,8 +1,15 @@
 import { createApp } from './app.js';
 
-const app = createApp();
-const PORT = 8787;
+const PORT = Number(process.env.PORT) || 8787;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+async function main() {
+  const app = await createApp();
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+main().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });

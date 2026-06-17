@@ -1,13 +1,16 @@
 import type { ProjectRecord } from '@ai-radar/shared';
 
-const API_BASE = 'http://localhost:8787';
+// 开发环境用 localhost，生产环境用环境变量或同源
+const API_BASE = import.meta.env.DEV
+  ? 'http://localhost:8787'
+  : (import.meta.env.VITE_API_BASE || '');
 
-export async function getProjects(): Promise<ProjectRecord[]> {
+export async function getProjects(): Promise<{ items: ProjectRecord[]; updatedAt: string }> {
   const response = await fetch(`${API_BASE}/api/projects`);
   if (!response.ok) {
     throw new Error(`Failed to fetch projects: ${response.statusText}`);
   }
-  return response.json() as Promise<ProjectRecord[]>;
+  return response.json() as Promise<{ items: ProjectRecord[]; updatedAt: string }>;
 }
 
 export async function refreshProjects(): Promise<{ queued: boolean }> {

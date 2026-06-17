@@ -1,34 +1,48 @@
-import BetterSqlite3 from 'better-sqlite3';
+import type { Pool, ResultSetHeader } from 'mysql2/promise';
 import type { ProjectRecord } from '@ai-radar/shared';
 
-export function saveProjects(db: BetterSqlite3.Database, projects: ProjectRecord[]): void {
-  const insert = db.prepare(`
-    INSERT OR REPLACE INTO projects (repoId, name, owner, url, summary, language, license, topics, stars, forks, pushedAt, last30dStars, activityScore, recommendationScore, recommendationReason, payload, updatedAt)
-    VALUES (@repoId, @name, @owner, @url, @summary, @language, @license, @topics, @stars, @forks, @pushedAt, @last30dStars, @activityScore, @recommendationScore, @recommendationReason, @payload, datetime('now'))
-  `);
-
-  const transaction = db.transaction((items: ProjectRecord[]) => {
-    for (const item of items) {
-      insert.run({
-        repoId: item.repoId,
-        name: item.name,
-        owner: item.owner,
-        url: item.url,
-        summary: item.summary,
-        language: item.language,
-        license: item.license,
-        topics: JSON.stringify(item.topics),
-        stars: item.stars,
-        forks: item.forks,
-        pushedAt: item.pushedAt,
-        last30dStars: item.last30dStars,
-        activityScore: item.activityScore,
-        recommendationScore: item.recommendationScore,
-        recommendationReason: item.recommendationReason,
-        payload: JSON.stringify(item),
-      });
+export async function saveProjects(pool: Pool, projects: ProjectRecord[]): Promise<void> {
+  // 用事务批量写入
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    for (const item of projects) {
+      await conn.execute(
+        `INSERT INTO projects (repoId, name, owner, url, summary, language, license, topics, stars, forks, pushedAt, last30dStars, activityScore, recommendationScore, recommendationReason, payload, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+         ON DUPLICATE KEY UPDATE
+           name = VALUES(name),
+           owner = VALUES(owner),
+           url = VALUES(url),
+           summary = VALUES(summary),
+           language = VALUES(language),
+           license = VALUES(license),
+           topics = VALUES(topics),
+           stars = VALUES(stars),
+           forks = VALUES(forks),
+           pushedAt = VALUES(pushedAt),
+           last30dStars = VALUES(last30dStars),
+           activityScore = VALUES(activityScore),
+           recommendationScore = VALUES(recommendationScore),
+           recommendationReason = VALUES(recommendationReason),
+           payload = VALUES(payload),
+           updatedAt = NOW()`,
+        [
+          item.repoId, item.name, item.owner, item.url,
+          item.summary, item.language, item.license,
+          JSON.stringify(item.topics),
+          item.stars, item.forks, item.pushedAt,
+          item.last30dStars, item.activityScore,
+          item.recommendationScore, item.recommendationReason,
+          JSON.stringify(item),
+        ],
+      );
     }
-  });
-
-  transaction(projects);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }

@@ -1,93 +1,84 @@
-import BetterSqlite3 from 'better-sqlite3';
+import type { Pool, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
-export function upsertNote(
-  db: BetterSqlite3.Database,
+export async function upsertNote(
+  pool: Pool,
   repoId: string,
   note: string,
   tags: string[],
   favorite: boolean,
   hidden: boolean,
-): void {
-  const upsert = db.prepare(`
-    INSERT INTO research_records (repoId, favorite, hidden, tags, note, updatedAt)
-    VALUES (@repoId, @favorite, @hidden, @tags, @note, datetime('now'))
-    ON CONFLICT(repoId) DO UPDATE SET
-      favorite = @favorite,
-      hidden = @hidden,
-      tags = @tags,
-      note = @note,
-      updatedAt = datetime('now')
-  `);
-
-  upsert.run({
-    repoId,
-    favorite: favorite ? 1 : 0,
-    hidden: hidden ? 1 : 0,
-    tags: JSON.stringify(tags),
-    note,
-  });
+): Promise<void> {
+  await pool.execute(
+    `INSERT INTO research_records (repoId, favorite, hidden, tags, note, updatedAt)
+     VALUES (?, ?, ?, ?, ?, NOW())
+     ON DUPLICATE KEY UPDATE
+       favorite = VALUES(favorite),
+       hidden = VALUES(hidden),
+       tags = VALUES(tags),
+       note = VALUES(note),
+       updatedAt = NOW()`,
+    [repoId, favorite ? 1 : 0, hidden ? 1 : 0, JSON.stringify(tags), note],
+  );
 }
 
-export function markHidden(
-  db: BetterSqlite3.Database,
+export async function markHidden(
+  pool: Pool,
   repoId: string,
   hidden: boolean,
-): void {
-  db.prepare(`
-    INSERT INTO research_records (repoId, hidden, updatedAt)
-    VALUES (@repoId, @hidden, datetime('now'))
-    ON CONFLICT(repoId) DO UPDATE SET
-      hidden = @hidden,
-      updatedAt = datetime('now')
-  `).run({ repoId, hidden: hidden ? 1 : 0 });
+): Promise<void> {
+  await pool.execute(
+    `INSERT INTO research_records (repoId, hidden, updatedAt)
+     VALUES (?, ?, NOW())
+     ON DUPLICATE KEY UPDATE
+       hidden = VALUES(hidden),
+       updatedAt = NOW()`,
+    [repoId, hidden ? 1 : 0],
+  );
 }
 
 /** 获取所有被隐藏的 repoId 列表 */
-export function getHiddenRepoIds(db: BetterSqlite3.Database): string[] {
-  const rows = db.prepare(
-    "SELECT repoId FROM research_records WHERE hidden = 1"
-  ).all() as Array<{ repoId: string }>;
-  return rows.map((r) => r.repoId);
+export async function getHiddenRepoIds(pool: Pool): Promise<string[]> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    'SELECT repoId FROM research_records WHERE hidden = 1',
+  );
+  return rows.map((r) => r.repoId as string);
 }
 
 /** 标记/取消收藏 */
-export function toggleFavorite(
-  db: BetterSqlite3.Database,
+export async function toggleFavorite(
+  pool: Pool,
   repoId: string,
   favorite: boolean,
-): void {
-  db.prepare(`
-    INSERT INTO research_records (repoId, favorite, updatedAt)
-    VALUES (@repoId, @favorite, datetime('now'))
-    ON CONFLICT(repoId) DO UPDATE SET
-      favorite = @favorite,
-      updatedAt = datetime('now')
-  `).run({ repoId, favorite: favorite ? 1 : 0 });
+): Promise<void> {
+  await pool.execute(
+    `INSERT INTO research_records (repoId, favorite, updatedAt)
+     VALUES (?, ?, NOW())
+     ON DUPLICATE KEY UPDATE
+       favorite = VALUES(favorite),
+       updatedAt = NOW()`,
+    [repoId, favorite ? 1 : 0],
+  );
 }
 
 /** 获取所有已收藏项目的 repoId 列表 */
-export function getFavoriteRepoIds(db: BetterSqlite3.Database): string[] {
-  const rows = db.prepare(
-    "SELECT repoId FROM research_records WHERE favorite = 1"
-  ).all() as Array<{ repoId: string }>;
-  return rows.map((r) => r.repoId);
+export async function getFavoriteRepoIds(pool: Pool): Promise<string[]> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    'SELECT repoId FROM research_records WHERE favorite = 1',
+  );
+  return rows.map((r) => r.repoId as string);
 }
 
-export function upsertTags(
-  db: BetterSqlite3.Database,
+export async function upsertTags(
+  pool: Pool,
   repoId: string,
   tags: string[],
-): void {
-  const upsert = db.prepare(`
-    INSERT INTO research_records (repoId, tags, updatedAt)
-    VALUES (@repoId, @tags, datetime('now'))
-    ON CONFLICT(repoId) DO UPDATE SET
-      tags = @tags,
-      updatedAt = datetime('now')
-  `);
-
-  upsert.run({
-    repoId,
-    tags: JSON.stringify(tags),
-  });
+): Promise<void> {
+  await pool.execute(
+    `INSERT INTO research_records (repoId, tags, updatedAt)
+     VALUES (?, ?, NOW())
+     ON DUPLICATE KEY UPDATE
+       tags = VALUES(tags),
+       updatedAt = NOW()`,
+    [repoId, JSON.stringify(tags)],
+  );
 }

@@ -1,13 +1,22 @@
 import express from 'express';
 import cors from 'cors';
-import BetterSqlite3 from 'better-sqlite3';
+import type { Pool } from 'mysql2/promise';
 import { healthRouter } from './routes/health.js';
 import { createProjectsRouter } from './routes/projects.js';
 import { createResearchRouter } from './routes/research.js';
 import { createExportRouter } from './routes/export.js';
-import { openDatabase } from './db.js';
+import { createPool } from './db.js';
 
-export function createApp(db?: BetterSqlite3.Database) {
+let poolPromise: Promise<Pool> | null = null;
+
+async function getPool(): Promise<Pool> {
+  if (!poolPromise) {
+    poolPromise = createPool();
+  }
+  return poolPromise;
+}
+
+export async function createApp(pool?: Pool) {
   const app = express();
 
   app.use(cors());
@@ -15,7 +24,7 @@ export function createApp(db?: BetterSqlite3.Database) {
 
   app.use('/api', healthRouter);
 
-  const database = db ?? openDatabase();
+  const database = pool ?? await getPool();
   app.use('/api', createProjectsRouter(database));
   app.use('/api', createResearchRouter(database));
   app.use('/api', createExportRouter());

@@ -4,8 +4,5 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    env: {
-      DB_FILE: ':memory:',
-    },
   },
 });
