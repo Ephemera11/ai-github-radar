@@ -171,6 +171,39 @@ body {
   color: var(--text-primary);
 }
 
+.project-card-btn-compared {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* App-level refresh button */
+.app-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: var(--accent-blue);
+  color: white;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.app-refresh-btn:hover {
+  background-color: #2563eb;
+}
+
+.app-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Filters Panel */
 .filters-panel {
   background-color: var(--bg-secondary);
