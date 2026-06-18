@@ -78,3 +78,15 @@ export async function addProject(data: {
   }
   return response.json() as Promise<{ added: boolean; project: ProjectRecord }>;
 }
+
+export async function summarizeProject(repoId: string): Promise<{ summary: string }> {
+  const [owner, repo] = repoId.split('/');
+  const response = await fetch(`${API_BASE}/api/projects/${owner}/${repo}/summarize`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'AI summary failed');
+  }
+  return response.json() as Promise<{ summary: string }>;
+}
