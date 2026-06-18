@@ -160,14 +160,14 @@ export function App() {
           <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>
             AI GitHub 热门项目推荐研究台
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             <ProjectTabs activeTab={activeTab} onTabChange={handleTabChange} />
             <button
-              className="project-card-btn project-card-btn-primary"
-              style={{ flexShrink: 0, height: 36 }}
+              className="app-refresh-btn"
               onClick={handleRefresh}
+              disabled={status === 'loading'}
             >
-              手动刷新
+              {status === 'loading' ? '刷新中…' : '🔄 手动刷新'}
             </button>
           </div>
           <StatusBanner status={status} updatedAt={updatedAt} errorMessage={errorMessage} />
@@ -178,6 +178,7 @@ export function App() {
             onDismiss={handleDismiss}
             onFavorite={handleFavorite}
             favoritedSet={favoritedRepos}
+            comparedSet={new Set(compareItems.map((c) => c.repoId))}
           />
           <CompareTray
             items={compareItems}
