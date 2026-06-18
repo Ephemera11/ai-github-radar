@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { ProjectRecord } from '@ai-radar/shared';
 import { formatStars } from '../lib/format';
 
@@ -8,11 +8,29 @@ export interface ProjectCardProps {
   onCompare?: (item: ProjectRecord) => void;
   onDismiss?: (item: ProjectRecord) => void;
   onFavorite?: (item: ProjectRecord) => void;
+  onSummarize?: (item: ProjectRecord) => Promise<string>;
   isFavorited?: boolean;
   isCompared?: boolean;
 }
 
-export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, isFavorited, isCompared }: ProjectCardProps): ReactNode {
+export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, onSummarize, isFavorited, isCompared }: ProjectCardProps): ReactNode {
+  const [showReason, setShowReason] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+
+  const handleSummarize = async () => {
+    if (!onSummarize || summarizing) return;
+    setSummarizing(true);
+    try {
+      const result = await onSummarize(item);
+      setSummary(result);
+    } catch {
+      setSummary('AI 总结生成失败，请稍后重试');
+    } finally {
+      setSummarizing(false);
+    }
+  };
+
   return (
     <div className="project-card">
       <div className="project-card-header">
@@ -24,7 +42,23 @@ export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, 
         <span className="project-card-language">{item.language}</span>
       </div>
       {item.recommendationReason && (
-        <div className="project-card-reason">{item.recommendationReason}</div>
+        <div>
+          <button
+            className="reason-toggle-btn"
+            onClick={() => setShowReason(!showReason)}
+          >
+            {showReason ? '▾ 收起理由' : '▸ 上榜理由'}
+          </button>
+          {showReason && (
+            <div className="project-card-reason">{item.recommendationReason}</div>
+          )}
+        </div>
+      )}
+      {summary && (
+        <div className="project-card-ai-summary">
+          <div className="ai-summary-label">🤖 AI 简介</div>
+          <p>{summary}</p>
+        </div>
       )}
       <div className="project-card-actions">
         <button
@@ -39,6 +73,15 @@ export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, 
         >
           {isCompared ? '✓ 已加入对比' : '加入对比'}
         </button>
+        {onSummarize && (
+          <button
+            className="project-card-btn project-card-btn-ai"
+            onClick={handleSummarize}
+            disabled={summarizing}
+          >
+            {summarizing ? '⏳ 生成中…' : summary ? '✓ 重新生成' : '🤖 AI 总结'}
+          </button>
+        )}
         <button
           className={`project-card-btn project-card-btn-fav ${isFavorited ? 'favorited' : ''}`}
           onClick={() => onFavorite?.(item)}
