@@ -15,8 +15,8 @@ describe('App', () => {
 
   it('should show loading status when clicking manual refresh button', async () => {
     render(<App />);
-    const button = await screen.findByText('手动刷新');
+    const button = await screen.findByText(/手动刷新/);
     fireEvent.click(button);
-    expect(await screen.findByText('刷新中...')).toBeDefined();
+    expect(await screen.findByText('刷新中…')).toBeDefined();
   });
 });
