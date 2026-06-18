@@ -308,7 +308,6 @@ body {
 .tabs-container {
   display: flex;
   gap: 4px;
-  margin-bottom: 20px;
   background-color: var(--bg-secondary);
   border-radius: 10px;
   padding: 4px;
