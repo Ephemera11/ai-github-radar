@@ -9,9 +9,10 @@ export interface ProjectCardProps {
   onDismiss?: (item: ProjectRecord) => void;
   onFavorite?: (item: ProjectRecord) => void;
   isFavorited?: boolean;
+  isCompared?: boolean;
 }
 
-export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, isFavorited }: ProjectCardProps): ReactNode {
+export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, isFavorited, isCompared }: ProjectCardProps): ReactNode {
   return (
     <div className="project-card">
       <div className="project-card-header">
@@ -33,10 +34,10 @@ export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, 
           查看详情
         </button>
         <button
-          className="project-card-btn"
+          className={`project-card-btn ${isCompared ? 'project-card-btn-compared' : ''}`}
           onClick={() => onCompare?.(item)}
         >
-          加入对比
+          {isCompared ? '✓ 已加入对比' : '加入对比'}
         </button>
         <button
           className={`project-card-btn project-card-btn-fav ${isFavorited ? 'favorited' : ''}`}
