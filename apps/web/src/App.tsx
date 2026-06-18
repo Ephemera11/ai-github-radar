@@ -10,7 +10,7 @@ import { CompareTray } from './components/CompareTray';
 import { useResearchStore } from './store/useResearchStore';
 import { downloadTextFile } from './lib/export';
 import type { StatusType } from './components/StatusBanner';
-import { getProjects, refreshProjects, hideProject, toggleFavorite, getFavorites, addProject as addProjectApi } from './lib/api';
+import { getProjects, refreshProjects, hideProject, toggleFavorite, getFavorites, addProject as addProjectApi, summarizeProject } from './lib/api';
 import './styles.css';
 
 export function App() {
@@ -146,6 +146,11 @@ export function App() {
     downloadTextFile('研究对比清单.txt', content);
   };
 
+  const handleSummarize = async (item: ProjectRecord) => {
+    const result = await summarizeProject(item.repoId);
+    return result.summary;
+  };
+
   return (
     <LayoutShell
       left={
@@ -177,6 +182,7 @@ export function App() {
             onCompare={handleCompare}
             onDismiss={handleDismiss}
             onFavorite={handleFavorite}
+            onSummarize={handleSummarize}
             favoritedSet={favoritedRepos}
             comparedSet={new Set(compareItems.map((c) => c.repoId))}
           />
