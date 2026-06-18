@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ProjectList } from './ProjectList';
 import type { ProjectRecord } from '@ai-radar/shared';
 
@@ -50,6 +50,9 @@ describe('ProjectList', () => {
 
     expect(screen.getByText('test-repo')).toBeDefined();
     expect(screen.getByText('another-repo')).toBeDefined();
+    // 理由默认折叠，点击展开后验证
+    const reasonBtns = screen.getAllByText('▸ 上榜理由');
+    reasonBtns.forEach((btn) => fireEvent.click(btn));
     expect(screen.getByText('High quality project with excellent community engagement')).toBeDefined();
     expect(screen.getByText('Rising star in the ML community')).toBeDefined();
   });
