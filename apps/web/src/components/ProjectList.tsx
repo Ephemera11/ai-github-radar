@@ -8,11 +8,12 @@ export interface ProjectListProps {
   onCompare?: (item: ProjectRecord) => void;
   onDismiss?: (item: ProjectRecord) => void;
   onFavorite?: (item: ProjectRecord) => void;
+  onSummarize?: (item: ProjectRecord) => Promise<string>;
   favoritedSet?: Set<string>;
   comparedSet?: Set<string>;
 }
 
-export function ProjectList({ items, onSelect, onCompare, onDismiss, onFavorite, favoritedSet, comparedSet }: ProjectListProps): ReactNode {
+export function ProjectList({ items, onSelect, onCompare, onDismiss, onFavorite, onSummarize, favoritedSet, comparedSet }: ProjectListProps): ReactNode {
   if (items.length === 0) {
     return <div className="project-list-empty">暂无项目数据</div>;
   }
@@ -27,6 +28,7 @@ export function ProjectList({ items, onSelect, onCompare, onDismiss, onFavorite,
           onCompare={onCompare}
           onDismiss={onDismiss}
           onFavorite={onFavorite}
+          onSummarize={onSummarize}
           isFavorited={favoritedSet?.has(item.repoId)}
           isCompared={comparedSet?.has(item.repoId)}
         />
