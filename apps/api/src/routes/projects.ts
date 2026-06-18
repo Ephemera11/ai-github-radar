@@ -48,5 +48,28 @@ export function createProjectsRouter(pool: Pool): Router {
     res.json({ added: true, project });
   });
 
+  router.post('/projects/:owner/:repo/summarize', async (req: Request, res: Response) => {
+    const { owner, repo } = req.params;
+    const repoId = `${owner}/${repo}`;
+    const projects = fetchAiProjects().filter((p) => p.repoId === repoId);
+
+    if (projects.length === 0) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
+    const p = projects[0];
+    const topicsStr = (p.topics ?? []).slice(0, 5).join('、');
+    const summary = [
+      `**${p.name}** 是一个基于 ${p.language || '多种技术'} 构建的开源项目，` +
+      `在 GitHub 上获得了 ${p.stars.toLocaleString()} 颗星标。`,
+      p.summary ? `\n\n该项目的主要功能是：${p.summary}` : '',
+      topicsStr ? `\n\n涉及关键技术标签：${topicsStr}。` : '',
+      p.recommendationReason ? `\n\n上榜理由：${p.recommendationReason}` : '',
+    ].join('');
+
+    res.json({ summary });
+  });
+
   return router;
 }
