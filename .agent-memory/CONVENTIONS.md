@@ -15,11 +15,12 @@ last_agent: codex
 
 ## 后端约定
 
-- 推荐候选过滤逻辑放在 `apps/api/src/services/repository-quality.ts`。
+- 推荐候选过滤逻辑放在 `packages/shared/src/repository-quality.ts`，API 和 Web 都复用同一套规则。
 - GitHub fixture 读取和排序入口在 `apps/api/src/services/github.ts`。
 - GitHub API 原始数据到前端记录的转换在 `apps/api/src/services/normalize.ts`。
 - 推荐分数和理由在 `apps/api/src/services/rank.ts`。
 - 已知 404 或失效仓库应在排序前过滤，不能只靠前端点击后暴露问题。
+- 线上可能存在旧 API 部署，前端 `apps/web/src/lib/api.ts` 也要做一次兜底过滤。
 
 ## 前端约定
 

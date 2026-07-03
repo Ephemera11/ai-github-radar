@@ -1,4 +1,4 @@
-import type { ProjectRecord } from '@ai-radar/shared';
+import { filterEligibleRecommendationRepos, type ProjectRecord } from '@ai-radar/shared';
 
 // 开发环境用 localhost，生产环境用环境变量或同源
 const API_BASE = import.meta.env.DEV
@@ -10,7 +10,8 @@ export async function getProjects(): Promise<{ items: ProjectRecord[]; updatedAt
   if (!response.ok) {
     throw new Error(`Failed to fetch projects: ${response.statusText}`);
   }
-  return response.json() as Promise<{ items: ProjectRecord[]; updatedAt: string }>;
+  const data = await response.json() as { items: ProjectRecord[]; updatedAt: string };
+  return { ...data, items: filterEligibleRecommendationRepos(data.items ?? []) };
 }
 
 export async function refreshProjects(): Promise<{ queued: boolean }> {
@@ -52,7 +53,8 @@ export async function getFavorites(): Promise<{ items: ProjectRecord[]; updatedA
   if (!response.ok) {
     throw new Error(`Failed to fetch favorites: ${response.statusText}`);
   }
-  return response.json() as Promise<{ items: ProjectRecord[]; updatedAt: string }>;
+  const data = await response.json() as { items: ProjectRecord[]; updatedAt: string };
+  return { ...data, items: filterEligibleRecommendationRepos(data.items ?? []) };
 }
 
 export async function addProject(data: {

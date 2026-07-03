@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { filterEligibleRecommendationRepos } from '@ai-radar/shared';
 import { normalizeRepo, type GitHubRepo, type ProjectRecord } from './normalize.js';
-import { filterEligibleRecommendationRepos } from './repository-quality.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

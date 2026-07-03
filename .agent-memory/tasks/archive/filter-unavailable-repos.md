@@ -15,11 +15,12 @@ blocked_by: []
 
 ## 完成内容
 
-- [x] 新增 `apps/api/src/services/repository-quality.ts`。
+- [x] 新增共享过滤模块 `packages/shared/src/repository-quality.ts`。
 - [x] 在排序前过滤非标准 GitHub 仓库 URL。
 - [x] 在排序前过滤已知失效仓库 `getomni-ai/omni`。
 - [x] 为过滤逻辑新增单元测试。
 - [x] 在 `/api/projects` 路由测试中断言 `getomni-ai/omni` 不再返回。
+- [x] 前端 API client 复用共享过滤逻辑，兜底过滤旧 API 仍返回的失效仓库。
 - [x] 将 `.agent-memory` 核心文件改为中文内容。
 
 ## 后续建议

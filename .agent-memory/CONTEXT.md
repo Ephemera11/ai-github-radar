@@ -37,7 +37,7 @@ ai-github-radar/
 ```text
 apps/api/src/fixtures/github-search.json
   -> apps/api/src/services/github.ts
-  -> repository-quality.ts 过滤不合格候选
+  -> packages/shared/src/repository-quality.ts 过滤不合格候选
   -> normalize.ts 转换为 ProjectRecord
   -> rank.ts 计算 recommendationScore
   -> routes/projects.ts 返回 /api/projects
@@ -47,8 +47,8 @@ apps/api/src/fixtures/github-search.json
 
 - 项目卡片标题在 `apps/web/src/components/ProjectCard.tsx` 中渲染，点击标题会用 `ProjectRecord.url` 打开 GitHub 仓库。
 - “查看详情”按钮仍保留为应用内研究侧栏入口。
-- `getomni-ai/omni` 当前访问 GitHub 返回 404，已在推荐候选质量过滤中排除。
-- 推荐逻辑在排序前先做候选质量过滤，避免已知失效仓库进入推荐列表。
+- `getomni-ai/omni` 当前访问 GitHub 返回 404，已在共享推荐候选质量过滤中排除。
+- 推荐逻辑在 API 排序前先做候选质量过滤，前端 API client 也会兜底过滤，避免线上旧 API 仍返回失效仓库时继续展示。
 - 前端样式集中在 `apps/web/src/styles.css`。
 
 ## 常用命令
