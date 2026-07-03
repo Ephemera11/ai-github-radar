@@ -26,30 +26,33 @@ ai-github-radar/
 │   ├── api/      # Express API、推荐排序、仓库数据、研究记录
 │   └── web/      # React 前端
 ├── packages/
-│   └── shared/   # 共享 zod 契约和类型
+│   └── shared/   # 共享 zod 契约、类型和仓库质量过滤
 └── .agent-memory/
 ```
 
 ## 关键数据流
 
-推荐列表当前来自：
+推荐列表当前优先来自 GitHub Search API，失败时再回退到本地 fixture：
 
 ```text
-apps/api/src/fixtures/github-search.json
+GitHub Search API
   -> apps/api/src/services/github.ts
   -> packages/shared/src/repository-quality.ts 过滤不合格候选
   -> normalize.ts 转换为 ProjectRecord
   -> rank.ts 计算 recommendationScore
   -> routes/projects.ts 返回 /api/projects
+
+apps/api/src/fixtures/github-search.json
+  -> 只作为开发和线上请求失败时的兜底示例数据
 ```
 
 ## 当前重要决策
 
 - 项目卡片标题在 `apps/web/src/components/ProjectCard.tsx` 中渲染，点击标题会用 `ProjectRecord.url` 打开 GitHub 仓库。
-- “查看详情”按钮仍保留为应用内研究侧栏入口。
-- `getomni-ai/omni` 当前访问 GitHub 返回 404，已在共享推荐候选质量过滤中排除。
+- “查看详情”按钮保留为应用内研究侧栏入口。
+- 已知 404 或失效仓库要在 `packages/shared/src/repository-quality.ts` 排除，目前包括 `getomni-ai/omni` 和 `bubble-io/bubble-templates`。
 - 推荐逻辑在 API 排序前先做候选质量过滤，前端 API client 也会兜底过滤，避免线上旧 API 仍返回失效仓库时继续展示。
-- 前端样式集中在 `apps/web/src/styles.css`。
+- `apps/api/src/fixtures/github-search.json` 不是实时爬取数据，不应被描述为生产推荐源。
 - Vercel 只部署静态前端，通过 `vercel.json` 的 `/api/:path*` rewrite 代理到腾讯云服务器 `http://1.15.145.150:8787/api/:path*`。
 
 ## 常用命令
@@ -63,6 +66,7 @@ $env:PATH = 'C:\Users\WTY\.workbuddy\binaries\node\versions\22.22.2;' + $env:PAT
 常用验证：
 
 ```powershell
+npm --workspace @ai-radar/shared run test
 npm --workspace @ai-radar/api run test
 npm --workspace @ai-radar/web run test
 npm run build

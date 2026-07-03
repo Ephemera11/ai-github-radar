@@ -35,7 +35,7 @@ export function createResearchRouter(pool: Pool): Router {
 
   router.get('/favorites', async (_req: Request, res: Response) => {
     const favorited = await getFavoriteRepoIds(pool);
-    const allProjects = fetchAiProjects();
+    const allProjects = await fetchAiProjects();
     const items = allProjects.filter((p) => favorited.includes(p.repoId));
     res.json({ items, updatedAt: new Date().toISOString() });
   });

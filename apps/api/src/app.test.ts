@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from './app.js';
 import type { Pool } from 'mysql2/promise';
+import { clearAiProjectsCache } from './services/github.js';
 
 // 创建一个极简的 mock Pool
 function mockPool(): Pool {
@@ -41,6 +42,8 @@ describe('Projects routes', () => {
 
   beforeEach(() => {
     pool = mockPool();
+    clearAiProjectsCache();
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
   });
 
   it('GET /api/projects should return 200 with items', async () => {
@@ -50,6 +53,7 @@ describe('Projects routes', () => {
     expect(res.body.items).toBeDefined();
     expect(res.body.items.length).toBeGreaterThan(0);
     expect(res.body.items.some((item: { repoId: string }) => item.repoId === 'getomni-ai/omni')).toBe(false);
+    expect(res.body.items.some((item: { repoId: string }) => item.repoId === 'bubble-io/bubble-templates')).toBe(false);
     expect(res.body.updatedAt).toBeDefined();
   });
 

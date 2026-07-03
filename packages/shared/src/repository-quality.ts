@@ -7,6 +7,7 @@ export interface RepositoryCandidate {
 
 const KNOWN_UNAVAILABLE_REPO_IDS = new Set([
   'getomni-ai/omni',
+  'bubble-io/bubble-templates',
 ]);
 
 function normalizeRepoId(value: string): string {

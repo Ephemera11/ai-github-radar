@@ -10,12 +10,12 @@ export function createProjectsRouter(pool: Pool): Router {
   router.get('/projects', async (_req: Request, res: Response) => {
     const hidden = await getHiddenRepoIds(pool);
     const hiddenSet = new Set(hidden);
-    const items = fetchAiProjects().filter((p) => !hiddenSet.has(p.repoId));
+    const items = (await fetchAiProjects()).filter((p) => !hiddenSet.has(p.repoId));
     res.json({ items, updatedAt: new Date().toISOString() });
   });
 
   router.post('/projects/refresh', async (_req: Request, res: Response) => {
-    fetchAiProjects();
+    await fetchAiProjects({ forceRefresh: true });
     res.status(202).json({ queued: true });
   });
 
@@ -51,7 +51,7 @@ export function createProjectsRouter(pool: Pool): Router {
   router.post('/projects/:owner/:repo/summarize', async (req: Request, res: Response) => {
     const { owner, repo } = req.params;
     const repoId = `${owner}/${repo}`;
-    const projects = fetchAiProjects().filter((p) => p.repoId === repoId);
+    const projects = (await fetchAiProjects()).filter((p) => p.repoId === repoId);
 
     if (projects.length === 0) {
       res.status(404).json({ error: 'Project not found' });

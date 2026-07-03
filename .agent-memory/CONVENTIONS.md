@@ -8,7 +8,7 @@ last_agent: codex
 ## 通用原则
 
 - 保持改动聚焦，优先沿用现有 monorepo 结构。
-- 共享数据契约放在 `packages/shared`。
+- 共享数据契约和可复用业务规则放在 `packages/shared`。
 - API 行为放在 `apps/api`，UI 行为放在 `apps/web`。
 - 不提交真实密钥、token、Deploy Hook 或本地 `.env`。
 - 新增业务规则时尽量拆成小的 service 函数，并补测试。
@@ -16,7 +16,10 @@ last_agent: codex
 ## 后端约定
 
 - 推荐候选过滤逻辑放在 `packages/shared/src/repository-quality.ts`，API 和 Web 都复用同一套规则。
-- GitHub fixture 读取和排序入口在 `apps/api/src/services/github.ts`。
+- GitHub 推荐源入口在 `apps/api/src/services/github.ts`。
+- 推荐源优先使用 GitHub Search API；如果没有网络、GitHub 限流或返回异常，再回退到 `apps/api/src/fixtures/github-search.json`。
+- `fixtures/github-search.json` 只作为开发/兜底示例数据，不代表实时爬取结果。
+- 可通过 `GITHUB_TOKEN` 提高 GitHub API 限额，通过 `GITHUB_SEARCH_QUERIES` 覆盖搜索语句，多个查询用英文分号分隔。
 - GitHub API 原始数据到前端记录的转换在 `apps/api/src/services/normalize.ts`。
 - 推荐分数和理由在 `apps/api/src/services/rank.ts`。
 - 已知 404 或失效仓库应在排序前过滤，不能只靠前端点击后暴露问题。
@@ -52,5 +55,5 @@ Commit message 简短明确：
 ```text
 feat(web): link project titles to github
 fix(api): filter unavailable recommendation repos
-docs(agent-memory): localize project memory
+feat(api): fetch live github recommendations
 ```

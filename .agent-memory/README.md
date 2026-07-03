@@ -24,12 +24,12 @@ updated: 2026-07-03
 
 完成或推进任务后，请更新对应记忆：
 
-| 你做了什么 | 更新哪个文件 |
+| 做了什么 | 更新哪个文件 |
 | --- | --- |
 | 改变项目背景、架构、数据流或部署方式 | `CONTEXT.md` |
 | 新增或修改编码规范 | `CONVENTIONS.md` |
 | 推进当前任务 | `tasks/active/<task-id>.md` |
-| 完成任务 | 将任务状态改为 `completed`，必要时移到 `tasks/archive/` |
+| 完成任务 | 将任务状态改为 completed，必要时移到 `tasks/archive/` |
 
 ## 核心原则
 

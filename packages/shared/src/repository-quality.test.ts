@@ -19,12 +19,17 @@ describe('repository quality filter', () => {
   it('marks known unavailable repositories', () => {
     expect(isKnownUnavailableRepo({ repoId: 'getomni-ai/omni' })).toBe(true);
     expect(isKnownUnavailableRepo({ full_name: 'getomni-ai/omni' })).toBe(true);
+    expect(isKnownUnavailableRepo({ full_name: 'bubble-io/bubble-templates' })).toBe(true);
   });
 
   it('rejects stale repositories before ranking or rendering', () => {
     expect(isEligibleRecommendationRepo({
       repoId: 'getomni-ai/omni',
       url: 'https://github.com/getomni-ai/omni',
+    })).toBe(false);
+    expect(isEligibleRecommendationRepo({
+      repoId: 'bubble-io/bubble-templates',
+      url: 'https://github.com/bubble-io/bubble-templates',
     })).toBe(false);
   });
 
@@ -39,6 +44,7 @@ describe('repository quality filter', () => {
     const repos = filterEligibleRecommendationRepos([
       { repoId: 'langgenius/dify', url: 'https://github.com/langgenius/dify' },
       { repoId: 'getomni-ai/omni', url: 'https://github.com/getomni-ai/omni' },
+      { repoId: 'bubble-io/bubble-templates', url: 'https://github.com/bubble-io/bubble-templates' },
     ]);
 
     expect(repos.map((item) => item.repoId)).toEqual(['langgenius/dify']);
