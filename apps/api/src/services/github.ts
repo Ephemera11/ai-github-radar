@@ -79,7 +79,10 @@ async function fetchGitHubSearchRepos(): Promise<GitHubRepo[]> {
 
     hasSuccessfulResponse = true;
     for (const repo of data.items ?? []) {
-      reposById.set(repo.full_name.toLowerCase(), repo);
+      reposById.set(repo.full_name.toLowerCase(), {
+        ...repo,
+        url: repo.html_url,
+      });
     }
   }
 

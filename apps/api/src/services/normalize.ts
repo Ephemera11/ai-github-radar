@@ -8,6 +8,7 @@ export interface GitHubRepo {
   id?: number;
   full_name: string;
   name: string;
+  url?: string;
   owner: {
     login: string;
     avatar_url?: string;
