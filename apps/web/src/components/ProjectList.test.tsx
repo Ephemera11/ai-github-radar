@@ -64,6 +64,15 @@ describe('ProjectList', () => {
     expect(screen.getByText('1k stars')).toBeDefined();
   });
 
+  it('should render project titles as GitHub links', () => {
+    render(<ProjectList items={mockItems} />);
+
+    const link = screen.getByRole('link', { name: 'test-repo' });
+    expect(link.getAttribute('href')).toBe('https://github.com/test-owner/test-repo');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noreferrer');
+  });
+
   it('should render languages', () => {
     render(<ProjectList items={mockItems} />);
 

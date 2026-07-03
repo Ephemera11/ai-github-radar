@@ -34,7 +34,14 @@ export function ProjectCard({ item, onSelect, onCompare, onDismiss, onFavorite, 
   return (
     <div className="project-card">
       <div className="project-card-header">
-        <span className="project-card-name">{item.name}</span>
+        <a
+          className="project-card-name"
+          href={item.url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {item.name}
+        </a>
         <span className="project-card-stars">{formatStars(item.stars)} stars</span>
       </div>
       <p className="project-card-summary">{item.summary}</p>
