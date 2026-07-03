@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { request as httpsRequest } from 'https';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { filterEligibleRecommendationRepos } from '@ai-radar/shared';
@@ -71,13 +72,12 @@ async function fetchGitHubSearchRepos(): Promise<GitHubRepo[]> {
     url.searchParams.set('order', 'desc');
     url.searchParams.set('per_page', '25');
 
-    const response = await fetch(url, { headers: buildGitHubHeaders() });
-    if (!response.ok) {
+    const data = await requestGitHubSearch(url, buildGitHubHeaders());
+    if (!data) {
       continue;
     }
 
     hasSuccessfulResponse = true;
-    const data = await response.json() as GitHubSearchResponse;
     for (const repo of data.items ?? []) {
       reposById.set(repo.full_name.toLowerCase(), repo);
     }
@@ -96,6 +96,53 @@ function loadFixtureProjects(): ProjectRecord[] {
   const data = JSON.parse(raw) as { items: GitHubRepo[] };
 
   return filterEligibleRecommendationRepos(data.items).map(normalizeRepo);
+}
+
+async function requestGitHubSearch(
+  url: URL,
+  headers: Record<string, string>,
+): Promise<GitHubSearchResponse | null> {
+  if (typeof fetch === 'function') {
+    const response = await fetch(url, { headers });
+    if (!response.ok) return null;
+    return await response.json() as GitHubSearchResponse;
+  }
+
+  return await requestJsonWithHttps(url, headers);
+}
+
+function requestJsonWithHttps(
+  url: URL,
+  headers: Record<string, string>,
+): Promise<GitHubSearchResponse | null> {
+  return new Promise((resolve, reject) => {
+    const req = httpsRequest(url, { headers }, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        body += chunk;
+      });
+      res.on('end', () => {
+        const statusCode = res.statusCode ?? 0;
+        if (statusCode < 200 || statusCode >= 300) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          resolve(JSON.parse(body) as GitHubSearchResponse);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+
+    req.setTimeout(15000, () => {
+      req.destroy(new Error('GitHub search request timed out.'));
+    });
+    req.on('error', reject);
+    req.end();
+  });
 }
 
 function sortProjects(projects: ProjectRecord[]): ProjectRecord[] {
