@@ -3,42 +3,52 @@ updated: 2026-07-03
 last_agent: codex
 ---
 
-# Conventions
+# 编码规范与约定
 
-## General
+## 通用原则
 
-- Keep changes focused and consistent with the existing monorepo structure.
-- Put shared contracts in `packages/shared`.
-- Keep API behavior in `apps/api` and UI behavior in `apps/web`.
-- Do not commit real secrets or local `.env` files.
+- 保持改动聚焦，优先沿用现有 monorepo 结构。
+- 共享数据契约放在 `packages/shared`。
+- API 行为放在 `apps/api`，UI 行为放在 `apps/web`。
+- 不提交真实密钥、token、Deploy Hook 或本地 `.env`。
+- 新增业务规则时尽量拆成小的 service 函数，并补测试。
 
-## Frontend
+## 后端约定
 
-- Components live in `apps/web/src/components`.
-- Styling lives in `apps/web/src/styles.css`.
-- Prefer accessible HTML semantics. Use real anchors for external links and buttons for in-app actions.
-- External links should use `target="_blank"` and `rel="noreferrer"`.
-- Preserve existing UI density and dark dashboard style unless a task explicitly asks for redesign.
+- 推荐候选过滤逻辑放在 `apps/api/src/services/repository-quality.ts`。
+- GitHub fixture 读取和排序入口在 `apps/api/src/services/github.ts`。
+- GitHub API 原始数据到前端记录的转换在 `apps/api/src/services/normalize.ts`。
+- 推荐分数和理由在 `apps/api/src/services/rank.ts`。
+- 已知 404 或失效仓库应在排序前过滤，不能只靠前端点击后暴露问题。
 
-## Testing
+## 前端约定
 
-- Update component tests when UI behavior changes.
-- Use Testing Library queries by role or visible text when possible.
-- Run the most focused workspace test first, then broader tests if the change touches shared behavior.
+- 组件位于 `apps/web/src/components`。
+- 样式位于 `apps/web/src/styles.css`。
+- 外部链接使用真实 `<a>` 标签，并设置 `target="_blank"` 和 `rel="noreferrer"`。
+- 应用内动作使用 `<button>`，例如查看详情、收藏、加入对比。
+- 保持现有暗色研究仪表盘风格，不做无关重设计。
 
-Recommended commands:
+## 测试约定
+
+- UI 行为变化要更新组件测试。
+- API 推荐规则变化要更新 service 或 route 测试。
+- 优先运行最相关测试，再根据影响范围运行 build。
+
+推荐命令：
 
 ```powershell
-npm --workspace @ai-radar/web run test
 npm --workspace @ai-radar/api run test
+npm --workspace @ai-radar/web run test
 npm run build
 ```
 
-## Git
+## Git 约定
 
-Commit messages should be short and scoped when useful:
+Commit message 简短明确：
 
 ```text
 feat(web): link project titles to github
-docs(agent-memory): add shared project memory
+fix(api): filter unavailable recommendation repos
+docs(agent-memory): localize project memory
 ```

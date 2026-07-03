@@ -7,20 +7,20 @@ last_agent: codex
 blocked_by: []
 ---
 
-# Link project titles and add agent memory
+# 项目标题跳转与 Agent 记忆初始化
 
-## Goal
+## 目标
 
-Make project card titles open the corresponding GitHub repository and add `.agent-memory/` to the repository.
+让项目卡片标题可以打开对应的 GitHub 仓库，并为仓库新增 `.agent-memory/` 共享记忆目录。
 
-## Completed
+## 已完成
 
-- [x] Located project title rendering in `apps/web/src/components/ProjectCard.tsx`.
-- [x] Confirmed `ProjectRecord.url` already stores the repository URL.
-- [x] Changed project titles from plain text to external links.
-- [x] Added hover and focus-visible styles for linked titles.
-- [x] Added a web component test for title link behavior.
-- [x] Added `.agent-memory/README.md`.
-- [x] Added `.agent-memory/CONTEXT.md`.
-- [x] Added `.agent-memory/CONVENTIONS.md`.
-- [x] Added this task archive entry.
+- [x] 定位标题渲染位置：`apps/web/src/components/ProjectCard.tsx`。
+- [x] 确认 `ProjectRecord.url` 已保存 GitHub 仓库地址。
+- [x] 将项目标题从纯文本改成外部链接。
+- [x] 为标题链接增加 hover 和 focus-visible 样式。
+- [x] 增加标题链接行为的前端组件测试。
+- [x] 新增 `.agent-memory/README.md`。
+- [x] 新增 `.agent-memory/CONTEXT.md`。
+- [x] 新增 `.agent-memory/CONVENTIONS.md`。
+- [x] 新增本任务归档记录。

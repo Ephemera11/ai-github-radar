@@ -49,6 +49,7 @@ describe('Projects routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.items).toBeDefined();
     expect(res.body.items.length).toBeGreaterThan(0);
+    expect(res.body.items.some((item: { repoId: string }) => item.repoId === 'getomni-ai/omni')).toBe(false);
     expect(res.body.updatedAt).toBeDefined();
   });
 
