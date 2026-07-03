@@ -50,6 +50,7 @@ apps/api/src/fixtures/github-search.json
 - `getomni-ai/omni` 当前访问 GitHub 返回 404，已在共享推荐候选质量过滤中排除。
 - 推荐逻辑在 API 排序前先做候选质量过滤，前端 API client 也会兜底过滤，避免线上旧 API 仍返回失效仓库时继续展示。
 - 前端样式集中在 `apps/web/src/styles.css`。
+- Vercel 只部署静态前端，通过 `vercel.json` 的 `/api/:path*` rewrite 代理到腾讯云服务器 `http://1.15.145.150:8787/api/:path*`。
 
 ## 常用命令
 

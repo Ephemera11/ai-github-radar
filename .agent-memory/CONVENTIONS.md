@@ -29,6 +29,7 @@ last_agent: codex
 - 外部链接使用真实 `<a>` 标签，并设置 `target="_blank"` 和 `rel="noreferrer"`。
 - 应用内动作使用 `<button>`，例如查看详情、收藏、加入对比。
 - 保持现有暗色研究仪表盘风格，不做无关重设计。
+- 生产环境 API 通过 Vercel rewrite 转发，修改 API 域名或端口时同步更新 `vercel.json`。
 
 ## 测试约定
 

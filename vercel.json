@@ -1,4 +1,10 @@
 {
   "buildCommand": "npm install --prefix apps/web && npm run build --prefix apps/web",
-  "outputDirectory": "apps/web/dist"
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://1.15.145.150:8787/api/:path*"
+    }
+  ]
 }

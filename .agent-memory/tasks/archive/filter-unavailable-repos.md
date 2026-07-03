@@ -22,6 +22,8 @@ blocked_by: []
 - [x] 在 `/api/projects` 路由测试中断言 `getomni-ai/omni` 不再返回。
 - [x] 前端 API client 复用共享过滤逻辑，兜底过滤旧 API 仍返回的失效仓库。
 - [x] 将 `.agent-memory` 核心文件改为中文内容。
+- [x] 更新服务器 `/opt/ai-github-radar` 的 API 代码并重启 8787 服务。
+- [x] 在 `vercel.json` 增加 `/api/:path*` rewrite，代理到腾讯云 API。
 
 ## 后续建议
 
