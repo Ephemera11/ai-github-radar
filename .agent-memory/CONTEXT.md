@@ -1,6 +1,6 @@
 ---
-updated: 2026-07-03
-last_agent: codex
+updated: 2026-07-10
+last_agent: trae
 ---
 
 # 项目背景
