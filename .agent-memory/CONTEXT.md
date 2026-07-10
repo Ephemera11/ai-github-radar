@@ -39,12 +39,23 @@ GitHub Search API
   -> apps/api/src/services/github.ts
   -> packages/shared/src/repository-quality.ts 过滤不合格候选
   -> normalize.ts 转换为 ProjectRecord
-  -> rank.ts 计算 recommendationScore
-  -> routes/projects.ts 返回 /api/projects
+  -> rank.ts 计算 recommendationScore 和排序
+  -> routes/projects.ts 返回 /api/projects?sort=<sortType>
 
 apps/api/src/fixtures/github-search.json
   -> 只作为开发和线上请求失败时的兜底示例数据
 ```
+
+## 排序策略
+
+四个 Tab 项现在使用不同的排序策略：
+
+| Tab | 排序方式 | 说明 |
+| --- | --- | --- |
+| 综合推荐 | recommendationScore | 综合考虑增长速率、活跃度、总星标、主题匹配 |
+| 本周热度 | last30dStars | 按近 30 天新增 Star 数排序 |
+| 历史高赞 | stars | 按总 Star 数排序 |
+| 新上升项目 | risingScore | 综合增长率和项目年龄，优先年轻且增长快的项目 |
 
 ## 当前重要决策
 

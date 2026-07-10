@@ -10,7 +10,7 @@ import { CompareTray } from './components/CompareTray';
 import { useResearchStore } from './store/useResearchStore';
 import { downloadTextFile } from './lib/export';
 import type { StatusType } from './components/StatusBanner';
-import { getProjects, refreshProjects, hideProject, toggleFavorite, getFavorites, addProject as addProjectApi, summarizeProject } from './lib/api';
+import { getProjects, refreshProjects, hideProject, toggleFavorite, getFavorites, addProject as addProjectApi, summarizeProject, type SortType } from './lib/api';
 import './styles.css';
 
 export function App() {
@@ -44,7 +44,7 @@ export function App() {
     setStatus('loading');
     setErrorMessage('');
     try {
-      const data = await getProjects();
+      const data = await getProjects(activeTab as SortType);
       setProjects(data.items ?? []);
       setUpdatedAt(new Date().toLocaleString());
       setStatus('idle');
@@ -76,7 +76,7 @@ export function App() {
     setErrorMessage('');
     try {
       await refreshProjects();
-      const data = await getProjects();
+      const data = await getProjects(activeTab as SortType);
       setProjects(data.items ?? []);
       setUpdatedAt(new Date().toLocaleString());
       setStatus('idle');

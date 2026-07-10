@@ -3,14 +3,16 @@ import type { Pool } from 'mysql2/promise';
 import { fetchAiProjects } from '../services/github.js';
 import { getHiddenRepoIds } from '../services/research-store.js';
 import { saveProjects } from '../services/project-store.js';
+import { type SortType } from '../services/rank.js';
 
 export function createProjectsRouter(pool: Pool): Router {
   const router = Router();
 
-  router.get('/projects', async (_req: Request, res: Response) => {
+  router.get('/projects', async (req: Request, res: Response) => {
     const hidden = await getHiddenRepoIds(pool);
     const hiddenSet = new Set(hidden);
-    const items = (await fetchAiProjects()).filter((p) => !hiddenSet.has(p.repoId));
+    const sortType = req.query.sort as SortType ?? 'recommended';
+    const items = (await fetchAiProjects({ sortType })).filter((p) => !hiddenSet.has(p.repoId));
     res.json({ items, updatedAt: new Date().toISOString() });
   });
 

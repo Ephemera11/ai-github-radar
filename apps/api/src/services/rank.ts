@@ -14,6 +14,8 @@ export interface ReasonInput {
   recentlyUpdated: boolean;
 }
 
+export type SortType = 'recommended' | 'trending' | 'stars' | 'rising';
+
 function clamp(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
@@ -81,4 +83,34 @@ export function buildRecommendationReason(input: ReasonInput): string {
   }
 
   return reasons.join('，');
+}
+
+export interface ProjectRecordForSort {
+  repoId: string;
+  stars: number;
+  last30dStars: number;
+  createdAt: string;
+  pushedAt: string;
+  recommendationScore: number;
+}
+
+export function sortProjectsByType(projects: ProjectRecordForSort[], sortType: SortType): ProjectRecordForSort[] {
+  return [...projects].sort((a, b) => {
+    switch (sortType) {
+      case 'recommended':
+        return b.recommendationScore - a.recommendationScore;
+      case 'trending':
+        return b.last30dStars - a.last30dStars;
+      case 'stars':
+        return b.stars - a.stars;
+      case 'rising':
+        const ageA = (new Date().getTime() - new Date(a.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        const ageB = (new Date().getTime() - new Date(b.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        const risingScoreA = (a.last30dStars / Math.max(1, ageA)) * (1 - Math.min(1, ageA / 365));
+        const risingScoreB = (b.last30dStars / Math.max(1, ageB)) * (1 - Math.min(1, ageB / 365));
+        return risingScoreB - risingScoreA;
+      default:
+        return b.recommendationScore - a.recommendationScore;
+    }
+  });
 }

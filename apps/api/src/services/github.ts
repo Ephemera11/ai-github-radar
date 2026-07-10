@@ -4,6 +4,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { filterEligibleRecommendationRepos } from '@ai-radar/shared';
 import { normalizeRepo, type GitHubRepo, type ProjectRecord } from './normalize.js';
+import { sortProjectsByType, type SortType } from './rank.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,28 +24,39 @@ interface GitHubSearchResponse {
 
 export interface FetchAiProjectsOptions {
   forceRefresh?: boolean;
+  sortType?: SortType;
 }
 
-let cachedProjects: { items: ProjectRecord[]; expiresAt: number } | null = null;
+interface CachedEntry {
+  items: ProjectRecord[];
+  expiresAt: number;
+}
+
+let cachedProjects = new Map<SortType | 'default', CachedEntry>();
 
 export function clearAiProjectsCache(): void {
-  cachedProjects = null;
+  cachedProjects.clear();
 }
 
 export async function fetchAiProjects(options: FetchAiProjectsOptions = {}): Promise<ProjectRecord[]> {
   const now = Date.now();
+  const sortType = options.sortType ?? 'recommended';
+  const cacheKey = sortType;
 
-  if (!options.forceRefresh && cachedProjects && cachedProjects.expiresAt > now) {
-    return cachedProjects.items;
+  if (!options.forceRefresh) {
+    const cachedEntry = cachedProjects.get(cacheKey);
+    if (cachedEntry && cachedEntry.expiresAt > now) {
+      return cachedEntry.items;
+    }
   }
 
   const projects = await fetchLiveProjects().catch(() => loadFixtureProjects());
-  const sortedProjects = sortProjects(projects);
+  const sortedProjects = sortProjectsByType(projects, sortType);
 
-  cachedProjects = {
+  cachedProjects.set(cacheKey, {
     items: sortedProjects,
     expiresAt: now + getCacheTtlMs(),
-  };
+  });
 
   return sortedProjects;
 }
@@ -148,9 +160,7 @@ function requestJsonWithHttps(
   });
 }
 
-function sortProjects(projects: ProjectRecord[]): ProjectRecord[] {
-  return [...projects].sort((a, b) => b.recommendationScore - a.recommendationScore);
-}
+
 
 function getSearchQueries(): string[] {
   const customQueries = process.env.GITHUB_SEARCH_QUERIES?.split(';')
