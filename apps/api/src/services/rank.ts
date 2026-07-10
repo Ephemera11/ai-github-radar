@@ -94,7 +94,7 @@ export interface ProjectRecordForSort {
   recommendationScore: number;
 }
 
-export function sortProjectsByType(projects: ProjectRecordForSort[], sortType: SortType): ProjectRecordForSort[] {
+export function sortProjectsByType<T extends ProjectRecordForSort>(projects: T[], sortType: SortType): T[] {
   return [...projects].sort((a, b) => {
     switch (sortType) {
       case 'recommended':

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install --prefix apps/web && npm run build --prefix apps/web",
+  "buildCommand": "npm install && npm run build --workspace @ai-radar/shared && npm run build --workspace @ai-radar/web",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     {
