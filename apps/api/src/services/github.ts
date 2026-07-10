@@ -10,13 +10,80 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const GITHUB_SEARCH_URL = 'https://api.github.com/search/repositories';
-const DEFAULT_SEARCH_QUERIES = [
-  'topic:llm stars:>1000 archived:false',
-  'topic:ai-agents stars:>500 archived:false',
-  'topic:rag stars:>500 archived:false',
-  'topic:chatbot stars:>1000 archived:false',
-];
 const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * 每个 Tab 对应不同的 GitHub Search 查询策略
+ *
+ * - recommended: 广泛 AI 主题，中等 star 门槛，综合排序
+ * - trending: 仅查近 7 天有推送的仓库，捕捉本周活跃项目
+ * - stars: 高 star 门槛（>20000），聚焦历史高赞项目
+ * - rising: 仅查近 180 天创建的新项目，发掘新上升项目
+ */
+interface SearchConfig {
+  queries: string[];
+  sort: 'stars' | 'updated' | 'forks';
+  order: 'desc' | 'asc';
+  perPage: number;
+}
+
+function getDateNDaysAgo(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+function buildSearchConfigs(): Record<SortType, SearchConfig> {
+  const weekAgo = getDateNDaysAgo(7);
+  const halfYearAgo = getDateNDaysAgo(180);
+
+  return {
+    recommended: {
+      queries: [
+        'topic:llm stars:>1000 archived:false',
+        'topic:ai-agents stars:>500 archived:false',
+        'topic:rag stars:>500 archived:false',
+        'topic:chatbot stars:>1000 archived:false',
+      ],
+      sort: 'stars',
+      order: 'desc',
+      perPage: 25,
+    },
+    trending: {
+      queries: [
+        `topic:llm stars:>500 archived:false pushed:>=${weekAgo}`,
+        `topic:ai-agents stars:>200 archived:false pushed:>=${weekAgo}`,
+        `topic:rag stars:>200 archived:false pushed:>=${weekAgo}`,
+        `topic:chatbot stars:>500 archived:false pushed:>=${weekAgo}`,
+      ],
+      sort: 'stars',
+      order: 'desc',
+      perPage: 25,
+    },
+    stars: {
+      queries: [
+        'topic:llm stars:>20000 archived:false',
+        'topic:ai-agents stars:>10000 archived:false',
+        'topic:rag stars:>10000 archived:false',
+        'topic:chatbot stars:>20000 archived:false',
+      ],
+      sort: 'stars',
+      order: 'desc',
+      perPage: 25,
+    },
+    rising: {
+      queries: [
+        `topic:llm stars:>100 archived:false created:>=${halfYearAgo}`,
+        `topic:ai-agents stars:>50 archived:false created:>=${halfYearAgo}`,
+        `topic:rag stars:>50 archived:false created:>=${halfYearAgo}`,
+        `topic:chatbot stars:>100 archived:false created:>=${halfYearAgo}`,
+      ],
+      sort: 'stars',
+      order: 'desc',
+      perPage: 25,
+    },
+  };
+}
 
 interface GitHubSearchResponse {
   items: GitHubRepo[];
@@ -50,7 +117,7 @@ export async function fetchAiProjects(options: FetchAiProjectsOptions = {}): Pro
     }
   }
 
-  const projects = await fetchLiveProjects().catch(() => loadFixtureProjects());
+  const projects = await fetchLiveProjects(sortType).catch(() => loadFixtureProjects());
   const sortedProjects = sortProjectsByType(projects, sortType);
 
   cachedProjects.set(cacheKey, {
@@ -61,8 +128,8 @@ export async function fetchAiProjects(options: FetchAiProjectsOptions = {}): Pro
   return sortedProjects;
 }
 
-async function fetchLiveProjects(): Promise<ProjectRecord[]> {
-  const repos = await fetchGitHubSearchRepos();
+async function fetchLiveProjects(sortType: SortType): Promise<ProjectRecord[]> {
+  const repos = await fetchGitHubSearchRepos(sortType);
   const projects = filterEligibleRecommendationRepos(repos).map(normalizeRepo);
 
   if (projects.length === 0) {
@@ -72,17 +139,17 @@ async function fetchLiveProjects(): Promise<ProjectRecord[]> {
   return projects;
 }
 
-async function fetchGitHubSearchRepos(): Promise<GitHubRepo[]> {
-  const queries = getSearchQueries();
+async function fetchGitHubSearchRepos(sortType: SortType): Promise<GitHubRepo[]> {
+  const config = getSearchConfig(sortType);
   const reposById = new Map<string, GitHubRepo>();
   let hasSuccessfulResponse = false;
 
-  for (const query of queries) {
+  for (const query of config.queries) {
     const url = new URL(GITHUB_SEARCH_URL);
     url.searchParams.set('q', query);
-    url.searchParams.set('sort', 'stars');
-    url.searchParams.set('order', 'desc');
-    url.searchParams.set('per_page', '25');
+    url.searchParams.set('sort', config.sort);
+    url.searchParams.set('order', config.order);
+    url.searchParams.set('per_page', String(config.perPage));
 
     const data = await requestGitHubSearch(url, buildGitHubHeaders());
     if (!data) {
@@ -162,12 +229,21 @@ function requestJsonWithHttps(
 
 
 
-function getSearchQueries(): string[] {
-  const customQueries = process.env.GITHUB_SEARCH_QUERIES?.split(';')
-    .map((query) => query.trim())
-    .filter(Boolean);
+function getSearchConfig(sortType: SortType): SearchConfig {
+  const configs = buildSearchConfigs();
 
-  return customQueries && customQueries.length > 0 ? customQueries : DEFAULT_SEARCH_QUERIES;
+  // GITHUB_SEARCH_QUERIES 环境变量仅覆盖 recommended 类型的查询语句
+  if (sortType === 'recommended') {
+    const customQueries = process.env.GITHUB_SEARCH_QUERIES?.split(';')
+      .map((query) => query.trim())
+      .filter(Boolean);
+
+    if (customQueries && customQueries.length > 0) {
+      return { ...configs.recommended, queries: customQueries };
+    }
+  }
+
+  return configs[sortType];
 }
 
 function getCacheTtlMs(): number {

@@ -35,27 +35,29 @@ ai-github-radar/
 推荐列表当前优先来自 GitHub Search API，失败时再回退到本地 fixture：
 
 ```text
-GitHub Search API
-  -> apps/api/src/services/github.ts
+GitHub Search API (每个 Tab 用不同查询条件)
+  -> apps/api/src/services/github.ts (按 sortType 选择 SearchConfig)
   -> packages/shared/src/repository-quality.ts 过滤不合格候选
   -> normalize.ts 转换为 ProjectRecord
-  -> rank.ts 计算 recommendationScore 和排序
+  -> rank.ts sortProjectsByType 按对应策略排序
   -> routes/projects.ts 返回 /api/projects?sort=<sortType>
 
 apps/api/src/fixtures/github-search.json
   -> 只作为开发和线上请求失败时的兜底示例数据
 ```
 
-## 排序策略
+## Tab 数据获取与排序策略
 
-四个 Tab 项现在使用不同的排序策略：
+四个 Tab 现在在数据获取层就使用不同的 GitHub Search 查询条件，而非仅排序不同：
 
-| Tab | 排序方式 | 说明 |
-| --- | --- | --- |
-| 综合推荐 | recommendationScore | 综合考虑增长速率、活跃度、总星标、主题匹配 |
-| 本周热度 | last30dStars | 按近 30 天新增 Star 数排序 |
-| 历史高赞 | stars | 按总 Star 数排序 |
-| 新上升项目 | risingScore | 综合增长率和项目年龄，优先年轻且增长快的项目 |
+| Tab | sortType | 查询条件 | 排序方式 | 说明 |
+| --- | --- | --- | --- | --- |
+| 综合推荐 | recommended | 广泛 AI 主题，stars:>500-1000 | recommendationScore | 综合考虑增长速率、活跃度、总星标、主题匹配 |
+| 本周热度 | trending | 仅查近 7 天有推送的仓库 (pushed:>=7天前) | last30dStars | 捕捉本周活跃项目 |
+| 历史高赞 | stars | 高 star 门槛 (stars:>10000-20000) | stars | 聚焦历史高赞项目 |
+| 新上升项目 | rising | 仅查近 180 天创建的新项目 (created:>=180天前) | risingScore | 发掘新上升项目 |
+
+搜索配置定义在 `apps/api/src/services/github.ts` 的 `buildSearchConfigs()` 函数中，每个 Tab 有独立的 queries、sort、order、perPage 参数。缓存按 sortType 分别存储。
 
 ## 当前重要决策
 
