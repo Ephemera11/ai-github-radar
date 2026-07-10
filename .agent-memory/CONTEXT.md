@@ -59,6 +59,12 @@ apps/api/src/fixtures/github-search.json
 
 搜索配置定义在 `apps/api/src/services/github.ts` 的 `buildSearchConfigs()` 函数中，每个 Tab 有独立的 queries、sort、order、perPage 参数。缓存按 sortType 分别存储。
 
+## 版本管理
+
+- 系统版本号定义在 `apps/web/src/lib/version.ts`，导出 `APP_VERSION` 常量。
+- 版本号显示在页面左上角标题旁的绿色 badge 中。
+- 每次改动后需递增版本号（当前 `v0.3.0`）。
+
 ## 当前重要决策
 
 - 项目卡片标题在 `apps/web/src/components/ProjectCard.tsx` 中渲染，点击标题会用 `ProjectRecord.url` 打开 GitHub 仓库。

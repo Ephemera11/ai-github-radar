@@ -11,6 +11,7 @@ import { useResearchStore } from './store/useResearchStore';
 import { downloadTextFile } from './lib/export';
 import type { StatusType } from './components/StatusBanner';
 import { getProjects, refreshProjects, hideProject, toggleFavorite, getFavorites, addProject as addProjectApi, summarizeProject, type SortType } from './lib/api';
+import { APP_VERSION } from './lib/version';
 import './styles.css';
 
 export function App() {
@@ -162,9 +163,12 @@ export function App() {
       }
       center={
         <>
-          <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>
-            AI GitHub 热门项目推荐研究台
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 700 }}>
+              AI GitHub 热门项目推荐研究台
+            </h1>
+            <span className="app-version-badge">{APP_VERSION}</span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             <ProjectTabs activeTab={activeTab} onTabChange={handleTabChange} />
             <button
